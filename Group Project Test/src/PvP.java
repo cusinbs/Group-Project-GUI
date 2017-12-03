@@ -15,23 +15,24 @@ public class PvP extends JFrame {
 
 	private JPanel contentPane;
         private Nim pvpGame = new Nim();
-	private boolean[][] counter = new boolean[11][11];
         private JButton[][] buttons = new JButton[11][11];
-        private int countTurn;
+        private int playerTurn = 0;
+        private PvPStart getNumPlayers = new PvPStart();
+        private int numPlayers;
 	/**
 	 * Launch the application.
 	 */
 	public static void main (String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					PvP frame = new PvP("Hello");
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+            EventQueue.invokeLater(new Runnable() {
+            public void run(){
+		try {
+                    PvP frame = new PvP("Hello");
+                    frame.setVisible(true);
+		} catch (Exception e) {
+		e.printStackTrace();
+                }
+            }
+            });
 	}
 	/**
 	 * Create the frame.
@@ -44,69 +45,55 @@ public class PvP extends JFrame {
             setContentPane(contentPane);
             contentPane.setLayout(null);
             generateTokens();
+            
         }   
         
-        void generateTokens(){
-            
-            pvpGame.display();
-            for (int h=0; h<11; h++) {
-                for (int g=0; g<11 ;g++) {
-                    counter[h][g] = false;
-                }
+        private void endingGame(){
+            if(pvpGame.checkEndGame()){ //checkEndGame is true means there is no token left 
+                System.out.println("Done");
+                JOptionPane.showMessageDialog(null, "Player X won", "InfoBox: " + "Congratulation", JOptionPane.INFORMATION_MESSAGE);
+                contentPane.setVisible(false);
+                MenuGUI mg = new MenuGUI();
+                mg.getFrame().show();
+            }else{
+                System.out.println(" Not Done Yet ");
             }
-       
-//            Random rand= new Random();
-//            int columns=rand.nextInt(8)+3;
+        }
+        
+        void generateTokens(){
+            pvpGame.display();
+           
             for (int j=0; j<pvpGame.getBoardSize();j++) {
                 for (int i=0; i<pvpGame.getNumToken(j);i++) {
-                    JButton token= new JButton("x"+j+",y"+i);
+                    JButton token= new JButton(j+""+i);
                     token.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             int countTokenRemoved = 0;
                             int heapRemoved = 0;
-                            for(int j=0; j<11; j++) {
-                                for (int i=0; i<11; i++) {
+                            for(int j=0; j<pvpGame.getBoardSize(); j++) {
+                                for (int i=0; i<pvpGame.getNumToken(j); i++) {
                                     if (e.getSource()==buttons[j][i]){
                                         heapRemoved = j;
-                                        System.out.println(j + " " + i);
-                                        for (int z=i; z<counter[j].length; z++) {
-                                            if (counter[j][z]==true) {
-	            				buttons[j][z].hide();
-	            				counter[j][z]=false;
-                                                countTokenRemoved++;
-                                                
-//                                                JLabel player = new JLabel("It is Player " + pvpGame.getPvPTurn(game.getNumPlayer()) + " 's Turn");
-//                                                player.setBounds(500, 50, 300, 100);
-//                                                contentPane.add(player);
-                                                
-                                            }
+                                        for (int z=i; z<pvpGame.getNumToken(heapRemoved); z++) {
+                                            buttons[j][z].hide();
+                                            countTokenRemoved++;
                                         }
                                     }
                                 }
                             }
                             pvpGame.removeToken(heapRemoved, countTokenRemoved);
+                            playerTurn++;
                             System.out.println();
                             pvpGame.display();
-                            countTurn++;
-                            if(pvpGame.checkEndGame()){ //checkEndGame is true means there is no token left 
-                                System.out.println("Done");
-                                //display a message box say player x won
-                                //terminate the pvp panel and hide it
-                                JOptionPane.showMessageDialog(null, "Player X won", "InfoBox: " + "Congratulation", JOptionPane.INFORMATION_MESSAGE);
-//                                contentPane.add(lblNewLabel);
-                                contentPane.setVisible(false);
-                                MenuGUI mg = new MenuGUI();
-                                mg.getFrame().show();
-                            }else{
-                                System.out.println(" Not Done Yet ");
-                            }
+                            
+                            endingGame();
                         }
                         });
                         token.setBounds(j*50, 575-(i*50), 50, 50);
                         getContentPane().add(token);  
                         buttons[j][i]=token;
-                        counter[j][i]=true;
 			}
                 }
+            
         }
 }

@@ -128,7 +128,7 @@ public class Nim {
             }
         }
         
-        System.out.println(numTokenTakeOff);
+        //System.out.println(numTokenTakeOff);
         if(winningMoveAvailable){ //Since win move is available
             //System.out.println("Not random"); 
             if(totalToken() == nimBoard[heapTakenIndex] + 1)
@@ -180,7 +180,7 @@ public class Nim {
     }
     
     public int getPvPTurn(int countTurn){
-        System.out.println(numPlayers);
+        //System.out.println(numPlayers);
         pvpTurn = (countTurn % numPlayers) +1;
         countTurn++;
         return pvpTurn;

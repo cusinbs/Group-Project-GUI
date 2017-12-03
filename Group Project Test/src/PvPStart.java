@@ -10,6 +10,7 @@ import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JOptionPane;
 
 public class PvPStart extends JFrame {
 
@@ -63,8 +64,13 @@ public class PvPStart extends JFrame {
 				PvP open = new PvP("Hello");
 				open.show();
 				dispose();
-				//numPlayers = Integer.valueOf(textField.getText());
-				//System.out.println(numPlayers+ "");
+				try{
+                                    setNumPlayer(Integer.parseInt(textField.getText()));
+                                    System.out.println("PVP START: " + numPlayers);
+                                }catch(NumberFormatException ex){
+                                    JOptionPane.showMessageDialog(null, "Invalid input!", "InfoBox: " + "Warning!", JOptionPane.INFORMATION_MESSAGE);
+                                    textField.setText("");
+                                }
 			}
 		});
 		btnNewButton.setBounds(143, 169, 161, 29);
@@ -82,5 +88,9 @@ public class PvPStart extends JFrame {
         
         public int getNumPlayer(){
             return numPlayers;
+        }
+        
+        public void setNumPlayer(int numPlayer){
+            this.numPlayers = numPlayer;
         }
 }

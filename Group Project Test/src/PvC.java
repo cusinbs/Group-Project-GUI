@@ -2,33 +2,35 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Random;
 import javax.swing.JButton;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 
 public class PvC extends JFrame {
 
 	private JPanel contentPane;
         private Nim pvcGame = new Nim();
-	private boolean[][] counter = new boolean[11][11];
-        private JButton[][] buttons = new JButton[11][11];
+        private JButton[][] buttons = new JButton[10][10];
+        private int playerTurn;
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					PvC frame = new PvC();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+            EventQueue.invokeLater(new Runnable() {
+            public void run() {
+		try {
+                    PvC frame = new PvC();
+                    frame.setVisible(true);
+		}catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            });
 	}
 
 	/**
@@ -42,82 +44,81 @@ public class PvC extends JFrame {
             setContentPane(contentPane);
             contentPane.setLayout(null);
             generateTokens();
+            whoGoestFirst();
 	}
         
-        void removeButtons(int heap, int token){
-            for(int i=pvcGame.getNumToken(heap) - token; i<pvcGame.getNumToken(heap); i++) {
-                System.out.println(heap + " " + i);
-                buttons[heap][i].hide();
-                counter[heap][i]=false;
+        private void whoGoestFirst(){
+            Random rand = new Random();
+            int goFirst = rand.nextInt(2); //choose who goes first.
+            if(goFirst == 0){ //comp goes first if goFirst = 0
+                if(pvcGame.totalToken() > 0){
+                    JOptionPane.showMessageDialog(null, "Computer goes first", "InfoBox: " + "Notification", JOptionPane.INFORMATION_MESSAGE);
+                    compMoveGUI();
+                }
+            }else{
+                    JOptionPane.showMessageDialog(null, "Player goes first", "InfoBox: " + "Notification", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+        private void removeButtons(int heap, int token){
+            for(int i = 0; i < token; i++){
+                buttons[heap][pvcGame.getNumToken(heap)+i].hide();
             }
         }
         
-        void generateTokens(){
-            pvcGame.display();
-            for (int h=0; h<11; h++) {
-                for (int g=0; g<11 ;g++) {
-                    counter[h][g] = false;
+        private void endingGame(){
+            if(pvcGame.checkEndGame()){ //checkEndGame is true means there is no token left 
+                if(playerTurn == 0){ //0 is computer took last token, 1 is player took last token
+                    JOptionPane.showMessageDialog(null, "Player won!", "InfoBox: " + "Congratulation", JOptionPane.INFORMATION_MESSAGE);
+                }else{
+                    JOptionPane.showMessageDialog(null, "Computer won!", "InfoBox: " + "Congratulation", JOptionPane.INFORMATION_MESSAGE);
                 }
+                contentPane.setVisible(false);
+                MenuGUI mg = new MenuGUI();
+                mg.getFrame().show();
             }
-       
-//            Random rand= new Random();
-//            int columns=rand.nextInt(8)+3;
+        }
+        
+        private void compMoveGUI(){
+            playerTurn = 0;
+            int[] tempResult = new int[2];
+            tempResult = pvcGame.compMove();
+            int token = tempResult[1];
+            int heap = tempResult[0];
+            removeButtons(heap,token);
+        }
+        
+        private void generateTokens(){
+            pvcGame.display();
             for (int j=0; j<pvcGame.getBoardSize();j++) {
                 for (int i=0; i<pvcGame.getNumToken(j);i++) {
-                    JButton token= new JButton("x"+j+",y"+i);
+                    JButton token= new JButton(j+""+i);
                     token.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             int countTokenRemoved = 0;
                             int heapRemoved = 0;
-                            for(int j=0; j<11; j++) {
-                                for (int i=0; i<11; i++) {
+                            for(int j=0; j<pvcGame.getBoardSize(); j++) {
+                                for (int i=0; i<pvcGame.getNumToken(j); i++) {
                                     if (e.getSource()==buttons[j][i]){
                                         heapRemoved = j;
-                                        System.out.println(j + " " + i);
-                                        for (int z=i; z<counter[j].length; z++) {
-                                            if (counter[j][z]==true) {
-	            				buttons[j][z].hide();
-	            				counter[j][z]=false;
-                                                countTokenRemoved++;
-                                                
-//                                                JLabel player = new JLabel("It is Player " + pvpGame.getPvPTurn(game.getNumPlayer()) + " 's Turn");
-//                                                player.setBounds(500, 50, 300, 100);
-//                                                contentPane.add(player);
-                                                
-                                            }
+                                        for (int z=i; z<pvcGame.getNumToken(heapRemoved); z++) {
+                                            buttons[j][z].hide();
+                                            countTokenRemoved++;
                                         }
                                     }
                                 }
                             }
                             pvcGame.removeToken(heapRemoved, countTokenRemoved);
-                            int[] tempResult = pvcGame.compMove();
-                            pvcGame.display();
-                            int token = tempResult[1];
-                            int heap = tempResult[0];
-//                            System.out.println(tempResult[0] + " " + tempResult[1] + " " + pvpGame.getNumToken(tempResult[0]));
-                            removeButtons(token,heap);
-                                
-                            
-                            System.out.println();
-                            
-                            if(pvcGame.checkEndGame()){ //checkEndGame is true means there is no token left 
-                                System.out.println("Done");
-                                //display a message box say player x won
-                                //terminate the pvp panel and hide it
-                                JOptionPane.showMessageDialog(null, "Player X won", "InfoBox: " + "Congratulation", JOptionPane.INFORMATION_MESSAGE);
-//                                contentPane.add(lblNewLabel);
-                                contentPane.setVisible(false);
-                                MenuGUI mg = new MenuGUI();
-                                mg.getFrame().show();
-                            }else{
-                                System.out.println(" Not Done Yet ");
+                            playerTurn = 1;
+                            if(pvcGame.totalToken() > 0){
+                                compMoveGUI();
                             }
+                            pvcGame.display();
+                            endingGame();
                         }
                         });
                         token.setBounds(j*50, 575-(i*50), 50, 50);
                         getContentPane().add(token);  
                         buttons[j][i]=token;
-                        counter[j][i]=true;
 			}
                 }
         }
